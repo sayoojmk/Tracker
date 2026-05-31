@@ -7,26 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f5f4f0;
-  --surface:#ffffff;
-  --surface2:#f0efe9;
-  --border:#e0dfd8;
-  --text:#1a1916;
-  --text2:#6b6a64;
-  --text3:#9b9a94;
-  --accent:#1a7a52;
-  --accent-light:#e6f4ed;
-  --accent-mid:#5db88a;
-  --amber:#b86a1a;
-  --amber-light:#fef3e6;
-  --radius:10px;
-  --radius-lg:14px;
+  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0efe9;--border:#e0dfd8;
+  --text:#1a1916;--text2:#6b6a64;--text3:#9b9a94;
+  --accent:#1a7a52;--accent-light:#e6f4ed;--accent-mid:#5db88a;
+  --radius:10px;--radius-lg:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
 .page{max-width:700px;margin:0 auto;padding:2rem 1rem 4rem}
 .page-title{font-size:26px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px}
 .page-sub{font-size:14px;color:var(--text2);margin-bottom:2rem}
+.sync-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;margin-bottom:1.5rem;font-size:13px;color:var(--text2)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
+.sync-dot.synced{background:var(--accent)}
+.sync-dot.syncing{background:#f0a500;animation:pulse 1s infinite}
+.sync-dot.error{background:#d94f4f}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .exam-tabs{display:flex;gap:6px;margin-bottom:1.75rem;flex-wrap:wrap}
 .tab-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text2);transition:all 0.15s;font-weight:500}
 .tab-btn:hover{border-color:#bbb;color:var(--text)}
@@ -54,7 +50,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .mod-pct{font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text2);min-width:36px;text-align:right}
 .mod-card.complete .mod-pct{color:var(--accent)}
 .chev{font-size:18px;color:var(--text3);transition:transform 0.2s;flex-shrink:0;line-height:1}
-.chev.open{transform:rotate(180deg)}
+.chev.open{transform:rotate(90deg)}
 .mod-bar-bg{height:2px;background:var(--border)}
 .mod-bar-fill{height:2px;background:var(--accent);transition:width 0.3s}
 .topics{display:none;flex-direction:column;gap:2px;padding:6px 10px 10px}
@@ -68,12 +64,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .reset-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:transparent;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text2)}
 .reset-btn:hover{background:var(--surface2)}
 .hint{font-size:11px;color:var(--text3)}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:100}
+.loading-overlay.hidden{display:none}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text2)}
 </style>
 </head>
 <body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading your progress…</div>
+</div>
+
 <div class="page">
   <div class="page-title">Mechanical Tracker</div>
   <div class="page-sub">Track your exam preparation topic by topic</div>
+
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-status">Connecting…</span>
+  </div>
 
   <div class="exam-tabs">
     <button class="tab-btn active" onclick="switchExam(0)">AE Hydrographic (Cat 539)</button>
@@ -99,11 +111,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
   <div class="footer-bar">
     <button class="reset-btn" onclick="resetAll()">Reset this exam</button>
-    <span class="hint">Progress saved in browser</span>
+    <span class="hint" id="last-sync"></span>
   </div>
 </div>
 
 <script>
+const SUPABASE_URL = 'https://ylmbfwnqaplnnzglrdaa.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsbWJmd25xYXBsbm56Z2xyZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzk4OTIsImV4cCI6MjA5NTc1NTg5Mn0.qebVDEOIZ1EBXFCJklz9UzVb7nyY4huFrdEPjDs5lTM';
+
 const EXAMS=[
   {
     key:'exam0',
@@ -135,39 +150,103 @@ const EXAMS=[
   }
 ];
 
-let currentExam=0;
+let currentExam = 0;
+let progressCache = {}; // id -> boolean
+let syncTimeout = null;
+let pendingSync = new Set();
 
-function sk(examKey,mi,ti){return examKey+'_m'+mi+'_t'+ti;}
-function getChecked(mi,ti){try{return localStorage.getItem(sk(EXAMS[currentExam].key,mi,ti))==='1';}catch(e){return false;}}
-function setChecked(mi,ti,val){try{localStorage.setItem(sk(EXAMS[currentExam].key,mi,ti),val?'1':'0');}catch(e){}}
+function setSync(state, msg){
+  const dot = document.getElementById('sync-dot');
+  const status = document.getElementById('sync-status');
+  dot.className = 'sync-dot ' + state;
+  status.textContent = msg;
+}
+
+async function loadAllProgress(){
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/progress?select=id,checked`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) throw new Error('Failed');
+    const rows = await res.json();
+    rows.forEach(r => { progressCache[r.id] = r.checked; });
+    setSync('synced', 'Synced across all devices');
+    document.getElementById('last-sync').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    setSync('error', 'Offline – progress saved locally');
+    // fallback to localStorage
+    try {
+      const local = JSON.parse(localStorage.getItem('psc_progress') || '{}');
+      Object.assign(progressCache, local);
+    } catch(e2){}
+  }
+  document.getElementById('loading-overlay').classList.add('hidden');
+  renderModules();
+}
+
+async function syncToSupabase(id, checked){
+  try {
+    setSync('syncing', 'Saving…');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/progress`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ id, checked, updated_at: new Date().toISOString() })
+    });
+    if (!res.ok) throw new Error('Failed');
+    setSync('synced', 'Synced across all devices');
+    document.getElementById('last-sync').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
+    // also save locally as backup
+    try { localStorage.setItem('psc_progress', JSON.stringify(progressCache)); } catch(e){}
+  } catch(e) {
+    setSync('error', 'Sync failed – will retry');
+    setTimeout(() => syncToSupabase(id, checked), 5000);
+  }
+}
+
+function getChecked(mi, ti){
+  const id = EXAMS[currentExam].key + '_m' + mi + '_t' + ti;
+  return progressCache[id] || false;
+}
+
+function setChecked(mi, ti, val){
+  const id = EXAMS[currentExam].key + '_m' + mi + '_t' + ti;
+  progressCache[id] = val;
+  syncToSupabase(id, val);
+}
 
 function updateStats(){
-  const exam=EXAMS[currentExam];
+  const exam = EXAMS[currentExam];
   let total=0,done=0,modDone=0,marksW=0,totalMarks=0;
   exam.modules.forEach((mod,mi)=>{
-    const t=mod.topics.length;
-    let d=mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
-    total+=t;done+=d;totalMarks+=mod.marks;
-    marksW+=mod.marks*(d/t);
-    if(d===t&&t>0){modDone++;document.getElementById('mc'+mi)?.classList.add('complete');}
+    const t = mod.topics.length;
+    let d = mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
+    total+=t; done+=d; totalMarks+=mod.marks;
+    marksW += mod.marks*(d/t);
+    if(d===t&&t>0){ modDone++; document.getElementById('mc'+mi)?.classList.add('complete'); }
     else document.getElementById('mc'+mi)?.classList.remove('complete');
   });
-  document.getElementById('done-count').textContent=done;
-  document.getElementById('total-count').textContent=total;
-  document.getElementById('mod-done').textContent=modDone+'/'+exam.modules.length;
-  document.getElementById('marks-val').textContent=Math.round(marksW)+'/'+totalMarks;
-  const pct=total>0?Math.round(done/total*100):0;
-  document.getElementById('overall-pct').textContent=pct+'%';
-  document.getElementById('overall-bar').style.width=pct+'%';
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('mod-done').textContent = modDone+'/'+exam.modules.length;
+  document.getElementById('marks-val').textContent = Math.round(marksW)+'/'+totalMarks;
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('overall-pct').textContent = pct+'%';
+  document.getElementById('overall-bar').style.width = pct+'%';
 }
 
 function updateModBar(mi){
-  const mod=EXAMS[currentExam].modules[mi];
-  const done=mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
-  const pct=Math.round(done/mod.topics.length*100);
-  const b=document.getElementById('mb'+mi);const p=document.getElementById('mp'+mi);
-  if(b)b.style.width=pct+'%';
-  if(p)p.textContent=pct+'%';
+  const mod = EXAMS[currentExam].modules[mi];
+  const done = mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
+  const pct = Math.round(done/mod.topics.length*100);
+  const b = document.getElementById('mb'+mi);
+  const p = document.getElementById('mp'+mi);
+  if(b) b.style.width = pct+'%';
+  if(p) p.textContent = pct+'%';
 }
 
 function toggleModule(mi){
@@ -176,41 +255,40 @@ function toggleModule(mi){
 }
 
 function renderModules(){
-  const exam=EXAMS[currentExam];
-  const list=document.getElementById('module-list');
-  list.innerHTML='';
+  const exam = EXAMS[currentExam];
+  const list = document.getElementById('module-list');
+  list.innerHTML = '';
   exam.modules.forEach((mod,mi)=>{
-    const card=document.createElement('div');
-    card.className='mod-card';card.id='mc'+mi;
-    const allDone=mod.topics.every((_,ti)=>getChecked(mi,ti));
-    if(allDone&&mod.topics.length>0)card.classList.add('complete');
+    const card = document.createElement('div');
+    card.className = 'mod-card'; card.id = 'mc'+mi;
+    if(mod.topics.every((_,ti)=>getChecked(mi,ti))&&mod.topics.length>0) card.classList.add('complete');
 
-    const header=document.createElement('div');
-    header.className='mod-header';
-    header.onclick=()=>toggleModule(mi);
-    header.innerHTML=`<div class="mod-icon">${mi+1}</div><div class="mod-info"><div class="mod-name">${mod.title}</div><div class="mod-meta">${mod.marks} marks · ${mod.topics.length} topics</div></div><div class="mod-pct" id="mp${mi}">0%</div><div class="chev" id="ch${mi}">›</div>`;
+    const header = document.createElement('div');
+    header.className = 'mod-header';
+    header.onclick = ()=>toggleModule(mi);
+    header.innerHTML = `<div class="mod-icon">${mi+1}</div><div class="mod-info"><div class="mod-name">${mod.title}</div><div class="mod-meta">${mod.marks} marks · ${mod.topics.length} topics</div></div><div class="mod-pct" id="mp${mi}">0%</div><div class="chev" id="ch${mi}">›</div>`;
 
-    const barBg=document.createElement('div');barBg.className='mod-bar-bg';
-    barBg.innerHTML=`<div class="mod-bar-fill" id="mb${mi}" style="width:0%"></div>`;
+    const barBg = document.createElement('div'); barBg.className='mod-bar-bg';
+    barBg.innerHTML = `<div class="mod-bar-fill" id="mb${mi}" style="width:0%"></div>`;
 
-    const topics=document.createElement('div');
-    topics.className='topics';topics.id='tp'+mi;
+    const topics = document.createElement('div');
+    topics.className = 'topics'; topics.id = 'tp'+mi;
     mod.topics.forEach((topic,ti)=>{
-      const row=document.createElement('label');row.className='topic-row';
-      const cb=document.createElement('input');cb.type='checkbox';cb.checked=getChecked(mi,ti);
-      const span=document.createElement('span');
-      span.className='topic-text'+(cb.checked?' done':'');
-      span.textContent=topic;
-      cb.onchange=e=>{
+      const row = document.createElement('label'); row.className='topic-row';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=getChecked(mi,ti);
+      const span = document.createElement('span');
+      span.className = 'topic-text'+(cb.checked?' done':'');
+      span.textContent = topic;
+      cb.onchange = e => {
         setChecked(mi,ti,e.target.checked);
-        span.className='topic-text'+(e.target.checked?' done':'');
-        updateModBar(mi);updateStats();
+        span.className = 'topic-text'+(e.target.checked?' done':'');
+        updateModBar(mi); updateStats();
       };
-      row.appendChild(cb);row.appendChild(span);
+      row.appendChild(cb); row.appendChild(span);
       topics.appendChild(row);
     });
 
-    card.appendChild(header);card.appendChild(barBg);card.appendChild(topics);
+    card.appendChild(header); card.appendChild(barBg); card.appendChild(topics);
     list.appendChild(card);
     updateModBar(mi);
   });
@@ -218,29 +296,29 @@ function renderModules(){
 }
 
 function switchExam(idx){
-  currentExam=idx;
+  currentExam = idx;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
   renderModules();
 }
 
-function resetAll(){
-  if(!confirm('Reset all checkboxes for this exam?'))return;
-  const exam=EXAMS[currentExam];
+async function resetAll(){
+  if(!confirm('Reset all checkboxes for this exam?')) return;
+  const exam = EXAMS[currentExam];
+  const updates = [];
   exam.modules.forEach((mod,mi)=>{
     mod.topics.forEach((_,ti)=>{
-      setChecked(mi,ti,false);
-      const cbs=document.querySelectorAll('#tp'+mi+' input[type=checkbox]');
-      if(cbs[ti]){cbs[ti].checked=false;}
-      const spans=document.querySelectorAll('#tp'+mi+' .topic-text');
-      if(spans[ti])spans[ti].className='topic-text';
+      const id = exam.key+'_m'+mi+'_t'+ti;
+      progressCache[id] = false;
+      updates.push(syncToSupabase(id, false));
     });
-    updateModBar(mi);
-    document.getElementById('mc'+mi)?.classList.remove('complete');
   });
-  updateStats();
+  await Promise.all(updates);
+  renderModules();
 }
 
-renderModules();
+// Init
+setSync('syncing', 'Loading progress…');
+loadAllProgress();
 </script>
 </body>
 </html>
