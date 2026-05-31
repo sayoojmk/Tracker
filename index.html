@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -14,7 +13,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
-.page{max-width:700px;margin:0 auto;padding:2rem 1rem 4rem}
+.page{max-width:740px;margin:0 auto;padding:2rem 1rem 4rem}
 .page-title{font-size:26px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px}
 .page-sub{font-size:14px;color:var(--text2);margin-bottom:1.5rem}
 .sync-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;margin-bottom:1.5rem;font-size:13px;color:var(--text2)}
@@ -23,17 +22,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sync-dot.syncing{background:#f0a500;animation:pulse 1s infinite}
 .sync-dot.error{background:#d94f4f}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* tabs */
+.tabs{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text2);font-weight:500;transition:all 0.15s}
+.tab-btn:hover{border-color:#bbb;color:var(--text)}
+.tab-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* stats */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
 @media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem 1rem}
 .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-family:'DM Mono',monospace}
 .stat-val{font-size:22px;font-weight:600;color:var(--text)}
+
+/* exam view summary cards */
+.exam-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1.5rem}
+.exam-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem}
+.exam-card-name{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px}
+.exam-card-pct{font-size:28px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'DM Mono',monospace}
+.exam-card-bar-bg{height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.exam-card-bar-fill{height:4px;border-radius:2px;background:var(--accent);transition:width 0.4s}
+.exam-card-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
 .overall-wrap{margin-bottom:1.75rem}
 .bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .bar-label{font-size:13px;color:var(--text2);font-weight:500}
 .bar-pct{font-size:13px;font-weight:600;color:var(--accent);font-family:'DM Mono',monospace}
 .bar-bg{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width 0.4s cubic-bezier(.4,0,.2,1)}
+
+/* modules */
 .modules{display:flex;flex-direction:column;gap:8px}
 .mod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color 0.15s}
 .mod-card.complete{border-color:var(--accent-mid)}
@@ -56,6 +75,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .topic-row input[type=checkbox]{margin-top:3px;cursor:pointer;accent-color:var(--accent);flex-shrink:0;width:15px;height:15px}
 .topic-text{font-size:13px;color:var(--text);line-height:1.45}
 .topic-text.done{color:var(--text3);text-decoration:line-through}
+
 .footer{margin-top:1.5rem;text-align:center;font-size:11px;color:var(--text3)}
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:100}
 .loading-overlay.hidden{display:none}
@@ -80,23 +100,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <span id="sync-status">Connecting…</span>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat"><div class="stat-label">Done</div><div class="stat-val" id="done-count">0</div></div>
-    <div class="stat"><div class="stat-label">Total</div><div class="stat-val" id="total-count">0</div></div>
-    <div class="stat"><div class="stat-label">Modules</div><div class="stat-val" id="mod-done">0</div></div>
-    <div class="stat"><div class="stat-label">Coverage</div><div class="stat-val" id="coverage">0%</div></div>
-  </div>
-
-  <div class="overall-wrap">
-    <div class="bar-row">
-      <span class="bar-label">Overall progress</span>
-      <span class="bar-pct" id="overall-pct">0%</span>
-    </div>
-    <div class="bar-bg"><div class="bar-fill" id="overall-bar" style="width:0%"></div></div>
-  </div>
-
-  <div class="modules" id="module-list"></div>
-
+  <div class="tabs" id="tabs"></div>
+  <div id="view-container"></div>
   <div class="footer" id="last-sync"></div>
 </div>
 
@@ -104,297 +109,288 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 const SUPABASE_URL = 'https://ylmbfwnqaplnnzglrdaa.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsbWJmd25xYXBsbm56Z2xyZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzk4OTIsImV4cCI6MjA5NTc1NTg5Mn0.qebVDEOIZ1EBXFCJklz9UzVb7nyY4huFrdEPjDs5lTM';
 
+// ─── MASTER MODULE LIST ───────────────────────────────────────────────────────
 const MODULES = [
+  { id:'eng_mech', title:'Engineering Mechanics', topics:[
+    'Kinematics – average & instantaneous velocity/acceleration',
+    'Equations of motion',
+    "Newton's laws of motion",
+    'Work, energy & momentum',
+    'Simple harmonic motion (SHM)',
+    'Moment of inertia & radius of gyration',
+    'Centre of gravity & centroid',
+    'Simple machines',
+    'Truss analysis',
+    'Dynamics – friction & circular motion',
+    'Parallel & perpendicular axis theorems',
+    'Free body diagrams',
+  ]},
+  { id:'som', title:'Mechanics & Strength of Materials', topics:[
+    'Simple stresses & strains',
+    "Hooke's law & elastic constants",
+    "Poisson's ratio",
+    'Linear & lateral stress-strain',
+    'Thermal stress & strains',
+    'Composite bar',
+    'Principal planes & principal stress',
+    "Mohr's circle",
+    'Shear force & bending moment diagrams',
+    'Bending & shear stresses in beams',
+    'Deflection of beams',
+    'Strain energy methods',
+    'Torsion of shafts',
+    'Thin & thick cylinders',
+    "Columns & struts – Euler's theory",
+    "Rankine's formula for short columns",
+    'Factor of safety',
+  ]},
+  { id:'fluid', title:'Fluid Mechanics', topics:[
+    'Fluid definition, properties & types',
+    "Pascal's law & hydrostatic law",
+    'Measurement of pressure',
+    'Total pressure & centre of pressure',
+    'Buoyancy, metacentre & metacentric height',
+    'Stability of floating bodies',
+    'Types of fluid flow & discharge',
+    'Continuity equation',
+    "Euler's & Bernoulli's equation",
+    'Venturi meter, orifice meter & pitot tube',
+    'Flow through orifices, notches & weirs',
+    'Reynolds number – laminar & turbulent flow',
+    'Hagen-Poiseuille equation',
+    "Major & minor losses – Darcy Weisbach & Chezy's formula",
+    'Entry, exit, expansion & contraction losses',
+    'Boundary layer, drag & lift',
+    'Water hammer & vapour pressure',
+    'Flow patterns',
+  ]},
+  { id:'hydro', title:'Hydraulic Machines', topics:[
+    'Impact of free jets – stationary & moving vanes',
+    'Pelton turbine – work done & efficiencies',
+    'Francis turbine – work done & efficiencies',
+    'Kaplan turbine – work done & efficiencies',
+    'Draft tube – types & uses',
+    'Specific speed & unit quantities',
+    'Governing of turbines',
+    'Cavitation & its effects',
+    'Centrifugal pump – manometric head, efficiency, priming',
+    'Reciprocating pump – air vessels, slip, indicator diagram',
+  ]},
+  { id:'thermo', title:'Thermodynamics', topics:[
+    'Thermodynamic systems, properties & processes',
+    'Intensive & extensive properties',
+    'Zeroth law of thermodynamics',
+    'First law of thermodynamics',
+    'Second law of thermodynamics',
+    'Third law & thermodynamic relations',
+    'Enthalpy & entropy',
+    'Reversible processes & Clausius inequality',
+    'Available & unavailable energy',
+    "Helmholtz & Gibbs functions, Maxwell's relations",
+    'Specific heats',
+    "Boyle's, Charles', Avogadro's & Joule's laws",
+    'Ideal & real gas behaviour',
+    "Gas mixtures – Dalton's & Gibbs-Dalton's law",
+    'Clapeyron equation & throttling – Joule Thomson coefficient',
+    'Carnot cycle & air standard efficiency',
+    'Otto cycle',
+    'Diesel cycle & dual combustion cycle',
+    'Properties of pure substances',
+  ]},
+  { id:'thermal', title:'Thermal & Power Plant Engineering', topics:[
+    'Fuels & combustion – min & excess air',
+    'Calorific values – LCV & HCV',
+    'Bomb calorimeter & gas calorimeter',
+    'Wet, dry & superheated steam',
+    'Rankine cycle',
+    'Brayton cycle',
+    'Steam turbines & multistage turbines',
+    'Velocity, pressure & velocity-pressure compounding',
+    'Impulse & reaction turbines',
+    'Steam nozzles',
+    'Gas turbines – regeneration, intercooling, reheating',
+    'Compressors – reciprocating single & multistage',
+    'Rotary compressors, fans & blowers',
+    'Boilers – fire tube & water tube (Cochran, Babcock & Wilcox)',
+    'High pressure boilers – La Mont, Benson',
+    'Boiler accessories & mountings',
+    'Power plants – hydro, thermal, diesel & nuclear',
+  ]},
+  { id:'ic', title:'IC Engines', topics:[
+    'Types of heat engines – SI & CI engines',
+    'Air supply, fuel supply & ignition systems',
+    'Detonation & knocking',
+    'Octane number & cetane number',
+    'Compression ratio & air-fuel ratio',
+    'Combustion in SI & CI engines',
+    'Auto ignition & pre-ignition',
+    'Performance testing of IC engines',
+    'Anti-knocking agents',
+  ]},
+  { id:'heat', title:'Heat Transfer & Refrigeration', topics:[
+    "Conduction – Fourier's law",
+    'Conduction through plane & composite walls',
+    "Convection – Newton's law of cooling",
+    'Free & forced convection – Newton-Rikhman equation',
+    "Radiation – Stefan-Boltzmann's law",
+    'Black body & grey body concept',
+    'Heat exchangers – LMTD & overall heat transfer coefficient',
+    'Refrigeration – COP & ton of refrigeration',
+    'Heat engine, refrigerator & heat pump',
+    'Reversed Carnot cycle',
+    'Properties of refrigerants',
+    'Psychrometry & psychrometric chart',
+    'Basic psychrometric processes & air conditioning',
+  ]},
+  { id:'materials', title:'Engineering Materials & Metallurgy', topics:[
+    'Classification & properties of engineering materials',
+    'Metals, nonmetals & alloys',
+    'Crystal structure, space lattice & unit cells',
+    'Miller indices, coordination number & atomic packing factor',
+    'Allotropy, polymorphism & crystal imperfections',
+    'Elastic & plastic deformation – slip, twinning, dislocation',
+    "Strain hardening & diffusion – Fick's laws",
+    "Gibbs phase rule, solid solutions & Hume Rothery's rule",
+    'Equilibrium diagrams – eutectic, eutectoid, peritectic',
+    'Iron-carbon equilibrium diagram',
+    'TTT diagrams & critical cooling rate',
+    'Upper & lower critical temperature',
+    'Heat treatment – annealing, normalising, hardening, tempering',
+    'Hardenability tests',
+    'Case hardening – carburising, nitriding, cyaniding, induction hardening',
+    'Precipitation hardening, recovery & recrystallisation',
+    'Cast iron & steels – properties, composition & uses',
+    'Effect of alloying elements',
+    'Copper, aluminium & titanium alloys',
+    'Plastics & newer engineering materials',
+  ]},
+  { id:'production', title:'Manufacturing & Production Engineering', topics:[
+    'Casting – types, patterns, moulds, cores & solidification',
+    'Riser & gating design, casting defects',
+    'Welding, brazing & soldering – types & defects',
+    'Sheet metal & smithy practices',
+    'Plastic deformation & yield criteria',
+    'Hot & cold working – rolling, forging, extrusion, wire drawing',
+    'Rotary piercing, swaging & metal spinning',
+    'Mechanics of machining & cutting tool geometry',
+    'Tool materials, tool life, wear & economics of machining',
+    'Lathe machine & operations',
+    'Shaper & planer machine & operations',
+    'Milling machine & operations',
+    'Drilling & boring machine & operations',
+    'Grinding machine & operations',
+    'Jigs, fixtures, turret & capstan lathes',
+    'NC/CNC machines & CNC programming',
+    'Unconventional machining – EDM, ECM, ECG, LBM, USM, AJM, EBM',
+    'Powder metallurgy',
+    'Limits, fits & tolerances',
+    'Linear & angular measurements, comparators & interferometry',
+    'Form & finish measurement & CMM',
+    'CAD/CAM & additive manufacturing',
+  ]},
+  { id:'drawing', title:'Engineering Drawing & Machine Design', topics:[
+    'First angle projection & symbol',
+    'Projection of points & lines in four quadrants',
+    'Conic sections – ellipse, parabola, hyperbola',
+    'Development of surfaces',
+    'Section of solids',
+    'Isometric & oblique projections',
+    'Fits & tolerances in drawing',
+    'Design of joints & threaded fasteners',
+    'Keys, cotters & couplings',
+    'Open & cross belt drives – length of belts',
+    'Rope & chain drives',
+    'Gear drives',
+    'Welded joints – strength & efficiencies',
+    'Riveted joints – strength & efficiencies',
+    'Design for static & dynamic loading',
+    'Failure theories & fatigue strength – S-N diagram',
+    'Shaft design',
+    'Spur gear design',
+    'Rolling & sliding contact bearings',
+  ]},
+  { id:'tom', title:'Theory of Machines', topics:[
+    'Kinematic & dynamic analysis of planar mechanisms',
+    'Belt, rope & chain drives – ratio of tensions & power',
+    'Friction clutches – plate & conical',
+    'Brakes & dynamometers – types',
+    'Gear types, terminology & law of gearing',
+    'Gear tooth profiles, interference & undercutting',
+    'Contact ratio & gear trains',
+    'Flywheels & governors',
+    'Gyroscope',
+    'Balancing – reciprocating & rotating masses',
+    'Free & forced vibrations – single DOF',
+    'Damping & vibration isolation',
+    'Resonance, critical speeds & whirling of shafts',
+  ]},
+  { id:'ie', title:'Industrial Engineering & Management', topics:[
+    "Taylor's scientific management & functions of management",
+    'Organisational structures – line, staff, functional, project, matrix',
+    'Types of companies & cooperative organisations',
+    'Facilities planning – site selection & plant layout',
+    'Material handling principles & equipment',
+    'Preventive & breakdown maintenance',
+    'Work study – process charts, flow diagrams & micromotion study',
+    'Therbligs, SIMO chart & motion economy principles',
+    'Allowances, standard time, job evaluation & wage plans',
+    'Production planning – forecasting, job/batch/mass production',
+    'Economic lot size, routing, scheduling & Gantt charts',
+    'Inventory models – EOQ, reorder level & selective control',
+    'Breakeven analysis',
+    'Statistical quality control – control charts & acceptance sampling',
+    'System reliability & bath tub curve',
+    'Personnel management – recruitment, training & safety',
+    'Linear programming – graphical, simplex, transportation & assignment',
+    'CPM & PERT',
+  ]},
+];
+
+// ─── EXAM DEFINITIONS ────────────────────────────────────────────────────────
+// Each exam maps module ids to marks for that exam
+const EXAMS = [
   {
-    title: 'Engineering Mechanics',
-    marks: {ae: null, inspector: null},
-    topics: [
-      'Kinematics – average & instantaneous velocity/acceleration',
-      'Equations of motion',
-      'Newton\'s laws of motion',
-      'Work, energy & momentum',
-      'Simple harmonic motion (SHM)',
-      'Moment of inertia & radius of gyration',
-      'Centre of gravity & centroid',
-      'Simple machines',
-      'Truss analysis',
-      'Dynamics – friction, circular motion',
-      'Parallel & perpendicular axis theorems',
-      'Free body diagrams',
-    ]
+    key: 'ae_hydro',
+    name: 'AE Hydrographic',
+    modules: {
+      eng_mech: { marks: null },
+      som:      { marks: 10 },
+      fluid:    { marks: 10 },
+      hydro:    { marks: 10 },
+      thermo:   { marks: 10 },
+      thermal:  { marks: 10 },
+      ic:       { marks: 10 },
+      heat:     { marks: 10 },
+      materials:{ marks: 10 },
+      production:{ marks: 10 },
+      drawing:  { marks: 10 },
+    }
   },
   {
-    title: 'Mechanics & Strength of Materials',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Simple stresses & strains',
-      'Hooke\'s law & elastic constants',
-      'Poisson\'s ratio',
-      'Linear & lateral stress-strain',
-      'Thermal stress & strains',
-      'Composite bar',
-      'Principal planes & principal stress',
-      'Mohr\'s circle',
-      'Shear force & bending moment diagrams',
-      'Bending & shear stresses in beams',
-      'Deflection of beams',
-      'Strain energy methods',
-      'Torsion of shafts',
-      'Thin & thick cylinders',
-      'Columns & struts – Euler\'s theory',
-      'Rankine\'s formula for short columns',
-      'Factor of safety',
-    ]
-  },
-  {
-    title: 'Fluid Mechanics',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Fluid definition, properties & types',
-      'Pascal\'s law & hydrostatic law',
-      'Measurement of pressure',
-      'Total pressure & centre of pressure',
-      'Buoyancy, metacentre & metacentric height',
-      'Stability of floating bodies',
-      'Types of fluid flow & discharge',
-      'Continuity equation',
-      'Euler\'s & Bernoulli\'s equation',
-      'Venturi meter, orifice meter & pitot tube',
-      'Flow through orifices, notches & weirs',
-      'Reynolds number – laminar & turbulent flow',
-      'Hagen-Poiseuille equation',
-      'Major & minor losses – Darcy Weisbach & Chezy\'s formula',
-      'Entry, exit, expansion & contraction losses',
-      'Boundary layer, drag & lift',
-      'Water hammer & vapour pressure',
-      'Flow patterns',
-    ]
-  },
-  {
-    title: 'Hydraulic Machines',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Impact of free jets – stationary & moving vanes',
-      'Pelton turbine – work done & efficiencies',
-      'Francis turbine – work done & efficiencies',
-      'Kaplan turbine – work done & efficiencies',
-      'Draft tube – types & uses',
-      'Specific speed & unit quantities',
-      'Governing of turbines',
-      'Cavitation & its effects',
-      'Centrifugal pump – manometric head, efficiency, priming',
-      'Reciprocating pump – air vessels, slip, indicator diagram',
-    ]
-  },
-  {
-    title: 'Thermodynamics',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Thermodynamic systems, properties & processes',
-      'Intensive & extensive properties',
-      'Zeroth law of thermodynamics',
-      'First law of thermodynamics',
-      'Second law of thermodynamics',
-      'Third law & thermodynamic relations',
-      'Enthalpy & entropy',
-      'Reversible processes & Clausius inequality',
-      'Available & unavailable energy',
-      'Helmholtz & Gibbs functions, Maxwell\'s relations',
-      'Specific heats',
-      'Boyle\'s, Charles\', Avogadro\'s & Joule\'s laws',
-      'Ideal & real gas behaviour',
-      'Gas mixtures – Dalton\'s & Gibbs-Dalton\'s law',
-      'Clapeyron equation & throttling – Joule Thomson coefficient',
-      'Carnot cycle & air standard efficiency',
-      'Otto cycle',
-      'Diesel cycle & dual combustion cycle',
-      'Properties of pure substances',
-    ]
-  },
-  {
-    title: 'Thermal & Power Plant Engineering',
-    marks: {ae: 10, inspector: 14},
-    topics: [
-      'Fuels & combustion – min & excess air',
-      'Calorific values – LCV & HCV',
-      'Bomb calorimeter & gas calorimeter',
-      'Wet, dry & superheated steam',
-      'Rankine cycle',
-      'Brayton cycle',
-      'Steam turbines & multistage turbines',
-      'Velocity, pressure & velocity-pressure compounding',
-      'Impulse & reaction turbines',
-      'Steam nozzles',
-      'Gas turbines – regeneration, intercooling, reheating',
-      'Compressors – reciprocating single & multistage',
-      'Rotary compressors, fans & blowers',
-      'Boilers – fire tube & water tube (Cochran, Babcock & Wilcox)',
-      'High pressure boilers – La Mont, Benson',
-      'Boiler accessories & mountings',
-      'Power plants – hydro, thermal, diesel & nuclear',
-    ]
-  },
-  {
-    title: 'IC Engines',
-    marks: {ae: 10, inspector: 14},
-    topics: [
-      'Types of heat engines – SI & CI engines',
-      'Air supply, fuel supply & ignition systems',
-      'Detonation & knocking',
-      'Octane number & cetane number',
-      'Compression ratio & air-fuel ratio',
-      'Combustion in SI & CI engines',
-      'Auto ignition & pre-ignition',
-      'Performance testing of IC engines',
-      'Anti-knocking agents',
-    ]
-  },
-  {
-    title: 'Heat Transfer & Refrigeration',
-    marks: {ae: 10, inspector: 14},
-    topics: [
-      'Conduction – Fourier\'s law',
-      'Conduction through plane & composite walls',
-      'Convection – Newton\'s law of cooling',
-      'Free & forced convection – Newton-Rikhman equation',
-      'Radiation – Stefan-Boltzmann\'s law',
-      'Black body & grey body concept',
-      'Heat exchangers – LMTD & overall heat transfer coefficient',
-      'Refrigeration – COP & ton of refrigeration',
-      'Heat engine, refrigerator & heat pump',
-      'Reversed Carnot cycle',
-      'Properties of refrigerants',
-      'Psychrometry & psychrometric chart',
-      'Basic psychrometric processes & air conditioning',
-    ]
-  },
-  {
-    title: 'Engineering Materials & Metallurgy',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Classification & properties of engineering materials',
-      'Metals, nonmetals & alloys',
-      'Crystal structure, space lattice & unit cells',
-      'Miller indices, coordination number & atomic packing factor',
-      'Allotropy, polymorphism & crystal imperfections',
-      'Elastic & plastic deformation – slip, twinning, dislocation',
-      'Strain hardening & diffusion – Fick\'s laws',
-      'Gibbs phase rule, solid solutions & Hume Rothery\'s rule',
-      'Equilibrium diagrams – eutectic, eutectoid, peritectic',
-      'Iron-carbon equilibrium diagram',
-      'TTT diagrams & critical cooling rate',
-      'Upper & lower critical temperature',
-      'Heat treatment – annealing, normalising, hardening, tempering',
-      'Hardenability tests',
-      'Case hardening – carburising, nitriding, cyaniding, induction hardening',
-      'Precipitation hardening, recovery & recrystallisation',
-      'Cast iron & steels – properties, composition & uses',
-      'Effect of alloying elements',
-      'Copper, aluminium & titanium alloys',
-      'Plastics & newer engineering materials',
-    ]
-  },
-  {
-    title: 'Manufacturing & Production Engineering',
-    marks: {ae: 10, inspector: 12},
-    topics: [
-      'Casting – types, patterns, moulds, cores & solidification',
-      'Riser & gating design, casting defects',
-      'Welding, brazing & soldering – types & defects',
-      'Sheet metal & smithy practices',
-      'Plastic deformation & yield criteria',
-      'Hot & cold working – rolling, forging, extrusion, wire drawing',
-      'Rotary piercing, swaging & metal spinning',
-      'Mechanics of machining & cutting tool geometry',
-      'Tool materials, tool life, wear & economics of machining',
-      'Lathe machine & operations',
-      'Shaper & planer machine & operations',
-      'Milling machine & operations',
-      'Drilling & boring machine & operations',
-      'Grinding machine & operations',
-      'Jigs, fixtures, turret & capstan lathes',
-      'NC/CNC machines & CNC programming',
-      'Unconventional machining – EDM, ECM, ECG, LBM, USM, AJM, EBM',
-      'Powder metallurgy',
-      'Limits, fits & tolerances',
-      'Linear & angular measurements, comparators & interferometry',
-      'Form & finish measurement & CMM',
-      'CAD/CAM & additive manufacturing',
-    ]
-  },
-  {
-    title: 'Engineering Drawing & Machine Design',
-    marks: {ae: 10, inspector: 14},
-    topics: [
-      'First angle projection & symbol',
-      'Projection of points & lines in four quadrants',
-      'Conic sections – ellipse, parabola, hyperbola',
-      'Development of surfaces',
-      'Section of solids',
-      'Isometric & oblique projections',
-      'Fits & tolerances in drawing',
-      'Design of joints & threaded fasteners',
-      'Keys, cotters & couplings',
-      'Open & cross belt drives – length of belts',
-      'Rope & chain drives',
-      'Gear drives',
-      'Welded joints – strength & efficiencies',
-      'Riveted joints – strength & efficiencies',
-      'Design for static & dynamic loading',
-      'Failure theories & fatigue strength – S-N diagram',
-      'Shaft design',
-      'Spur gear design',
-      'Rolling & sliding contact bearings',
-    ]
-  },
-  {
-    title: 'Theory of Machines',
-    marks: {ae: null, inspector: 14},
-    topics: [
-      'Kinematic & dynamic analysis of planar mechanisms',
-      'Belt, rope & chain drives – ratio of tensions & power',
-      'Friction clutches – plate & conical',
-      'Brakes & dynamometers – types',
-      'Gear types, terminology & law of gearing',
-      'Gear tooth profiles, interference & undercutting',
-      'Contact ratio & gear trains',
-      'Flywheels & governors',
-      'Gyroscope',
-      'Balancing – reciprocating & rotating masses',
-      'Free & forced vibrations – single DOF',
-      'Damping & vibration isolation',
-      'Resonance, critical speeds & whirling of shafts',
-    ]
-  },
-  {
-    title: 'Industrial Engineering & Management',
-    marks: {ae: null, inspector: 12},
-    topics: [
-      'Taylor\'s scientific management & functions of management',
-      'Organisational structures – line, staff, functional, project, matrix',
-      'Types of companies & cooperative organisations',
-      'Facilities planning – site selection & plant layout',
-      'Material handling principles & equipment',
-      'Preventive & breakdown maintenance',
-      'Work study – process charts, flow diagrams & micromotion study',
-      'Therbligs, SIMO chart & motion economy principles',
-      'Allowances, standard time, job evaluation & wage plans',
-      'Production planning – forecasting, job/batch/mass production',
-      'Economic lot size, routing, scheduling & Gantt charts',
-      'Inventory models – EOQ, reorder level & selective control',
-      'Breakeven analysis',
-      'Statistical quality control – control charts & acceptance sampling',
-      'System reliability & bath tub curve',
-      'Personnel management – recruitment, training & safety',
-      'Linear programming – graphical, simplex, transportation & assignment',
-      'CPM & PERT',
-    ]
+    key: 'inspector',
+    name: 'Inspector / DE / AE',
+    modules: {
+      som:      { marks: 12 },
+      fluid:    { marks: 12 },
+      hydro:    { marks: 12 },
+      thermo:   { marks: 12 },
+      thermal:  { marks: 14 },
+      ic:       { marks: 14 },
+      heat:     { marks: 14 },
+      materials:{ marks: 12 },
+      production:{ marks: 12 },
+      drawing:  { marks: 14 },
+      tom:      { marks: 14 },
+      ie:       { marks: 12 },
+    }
   },
 ];
 
-const STORAGE_KEY = 'unified';
+// ─── STATE ────────────────────────────────────────────────────────────────────
 let progressCache = {};
+let currentTab = 'master'; // 'master' | exam.key
 
+// ─── SUPABASE ─────────────────────────────────────────────────────────────────
 function setSync(state, msg){
   document.getElementById('sync-dot').className = 'sync-dot ' + state;
   document.getElementById('sync-status').textContent = msg;
@@ -403,143 +399,271 @@ function setSync(state, msg){
 async function loadAllProgress(){
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/progress?select=id,checked`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      headers:{ 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
-    if (!res.ok) throw new Error('Failed');
+    if (!res.ok) throw new Error();
     const rows = await res.json();
     rows.forEach(r => { progressCache[r.id] = r.checked; });
     setSync('synced', 'Synced across all devices');
     document.getElementById('last-sync').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
   } catch(e) {
-    setSync('error', 'Offline – progress saved locally');
-    try {
-      const local = JSON.parse(localStorage.getItem('mech_progress') || '{}');
-      Object.assign(progressCache, local);
-    } catch(e2){}
+    setSync('error', 'Offline – saved locally');
+    try{ Object.assign(progressCache, JSON.parse(localStorage.getItem('mech_progress')||'{}')); }catch(e2){}
   }
   document.getElementById('loading-overlay').classList.add('hidden');
-  renderModules();
+  renderView();
 }
 
 async function syncToSupabase(id, checked){
   try {
     setSync('syncing', 'Saving…');
     const res = await fetch(`${SUPABASE_URL}/rest/v1/progress`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+      method:'POST',
+      headers:{
+        'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates'
       },
       body: JSON.stringify({ id, checked, updated_at: new Date().toISOString() })
     });
-    if (!res.ok) throw new Error('Failed');
+    if (!res.ok) throw new Error();
     setSync('synced', 'Synced across all devices');
     document.getElementById('last-sync').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
-    try { localStorage.setItem('mech_progress', JSON.stringify(progressCache)); } catch(e){}
+    try{ localStorage.setItem('mech_progress', JSON.stringify(progressCache)); }catch(e){}
   } catch(e) {
-    setSync('error', 'Sync failed – will retry');
-    setTimeout(() => syncToSupabase(id, checked), 5000);
+    setSync('error', 'Sync failed – retrying');
+    setTimeout(()=>syncToSupabase(id, checked), 5000);
   }
 }
 
-function getId(mi, ti){ return `${STORAGE_KEY}_m${mi}_t${ti}`; }
-function getChecked(mi, ti){ return progressCache[getId(mi,ti)] || false; }
-function setChecked(mi, ti, val){
-  progressCache[getId(mi,ti)] = val;
-  syncToSupabase(getId(mi,ti), val);
+function getId(modId, ti){ return `m_${modId}_t${ti}`; }
+function getChecked(modId, ti){ return progressCache[getId(modId,ti)] || false; }
+function setChecked(modId, ti, val){
+  progressCache[getId(modId,ti)] = val;
+  syncToSupabase(getId(modId,ti), val);
 }
 
-function marksLabel(marks){
-  const parts = [];
-  if(marks.ae) parts.push(`AE ${marks.ae}m`);
-  if(marks.inspector) parts.push(`Insp ${marks.inspector}m`);
-  return parts.join(' · ');
+// ─── STATS HELPERS ────────────────────────────────────────────────────────────
+function getModuleStats(mod){
+  const total = mod.topics.length;
+  const done = mod.topics.filter((_,ti)=>getChecked(mod.id,ti)).length;
+  return { total, done, pct: total>0 ? Math.round(done/total*100) : 0 };
 }
 
-function updateStats(){
-  let total=0, done=0, modDone=0;
-  MODULES.forEach((mod,mi)=>{
-    const t = mod.topics.length;
-    const d = mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
-    total+=t; done+=d;
-    if(d===t&&t>0){ modDone++; document.getElementById('mc'+mi)?.classList.add('complete'); }
-    else document.getElementById('mc'+mi)?.classList.remove('complete');
+function getExamStats(exam){
+  let total=0, done=0;
+  Object.keys(exam.modules).forEach(modId=>{
+    const mod = MODULES.find(m=>m.id===modId);
+    if(!mod) return;
+    total += mod.topics.length;
+    done += mod.topics.filter((_,ti)=>getChecked(modId,ti)).length;
   });
-  document.getElementById('done-count').textContent = done;
-  document.getElementById('total-count').textContent = total;
-  document.getElementById('mod-done').textContent = modDone+'/'+MODULES.length;
-  const pct = total>0 ? Math.round(done/total*100) : 0;
-  document.getElementById('coverage').textContent = pct+'%';
-  document.getElementById('overall-pct').textContent = pct+'%';
-  document.getElementById('overall-bar').style.width = pct+'%';
+  return { total, done, pct: total>0 ? Math.round(done/total*100) : 0 };
 }
 
-function updateModBar(mi){
-  const mod = MODULES[mi];
-  const done = mod.topics.filter((_,ti)=>getChecked(mi,ti)).length;
-  const pct = Math.round(done/mod.topics.length*100);
-  const b = document.getElementById('mb'+mi);
-  const p = document.getElementById('mp'+mi);
-  if(b) b.style.width = pct+'%';
-  if(p) p.textContent = pct+'%';
+function getMasterStats(){
+  let total=0, done=0, modDone=0;
+  MODULES.forEach(mod=>{
+    const s = getModuleStats(mod);
+    total+=s.total; done+=s.done;
+    if(s.done===s.total&&s.total>0) modDone++;
+  });
+  return { total, done, modDone, pct: total>0?Math.round(done/total*100):0 };
 }
 
-function toggleModule(mi){
-  document.getElementById('tp'+mi)?.classList.toggle('open');
-  document.getElementById('ch'+mi)?.classList.toggle('open');
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderTabs(){
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  const addTab = (key, label) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (currentTab===key?' active':'');
+    btn.textContent = label;
+    btn.onclick = () => { currentTab=key; renderTabs(); renderView(); };
+    tabs.appendChild(btn);
+  };
+  addTab('master', 'Master');
+  EXAMS.forEach(e => addTab(e.key, e.name));
 }
 
-function renderModules(){
-  const list = document.getElementById('module-list');
-  list.innerHTML = '';
-  MODULES.forEach((mod,mi)=>{
+function renderView(){
+  const container = document.getElementById('view-container');
+  container.innerHTML = '';
+  if(currentTab==='master') renderMaster(container);
+  else {
+    const exam = EXAMS.find(e=>e.key===currentTab);
+    if(exam) renderExamView(container, exam);
+  }
+}
+
+function renderMaster(container){
+  const s = getMasterStats();
+
+  // stats grid
+  container.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-label">Done</div><div class="stat-val" id="done-count">${s.done}</div></div>
+      <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${s.total}</div></div>
+      <div class="stat"><div class="stat-label">Modules</div><div class="stat-val">${s.modDone}/${MODULES.length}</div></div>
+      <div class="stat"><div class="stat-label">Coverage</div><div class="stat-val">${s.pct}%</div></div>
+    </div>
+    <div class="overall-wrap">
+      <div class="bar-row"><span class="bar-label">Overall progress</span><span class="bar-pct">${s.pct}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${s.pct}%"></div></div>
+    </div>
+    <div class="exam-summary" id="exam-summary"></div>
+    <div class="modules" id="module-list"></div>`;
+
+  // exam summary cards
+  const examSummary = container.querySelector('#exam-summary');
+  EXAMS.forEach(exam=>{
+    const es = getExamStats(exam);
     const card = document.createElement('div');
-    card.className = 'mod-card'; card.id = 'mc'+mi;
-    if(mod.topics.every((_,ti)=>getChecked(mi,ti))&&mod.topics.length>0) card.classList.add('complete');
+    card.className = 'exam-card';
+    card.innerHTML = `
+      <div class="exam-card-name">${exam.name}</div>
+      <div class="exam-card-pct">${es.pct}%</div>
+      <div class="exam-card-bar-bg"><div class="exam-card-bar-fill" style="width:${es.pct}%"></div></div>
+      <div class="exam-card-sub">${es.done} / ${es.total} topics</div>`;
+    examSummary.appendChild(card);
+  });
 
-    const ml = marksLabel(mod.marks);
+  // modules
+  renderModuleCards(container.querySelector('#module-list'), MODULES);
+}
+
+function renderExamView(container, exam){
+  const es = getExamStats(exam);
+  const examModules = MODULES.filter(m => exam.modules[m.id]);
+  const modDone = examModules.filter(m=>{ const s=getModuleStats(m); return s.done===s.total&&s.total>0; }).length;
+
+  container.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-label">Done</div><div class="stat-val">${es.done}</div></div>
+      <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${es.total}</div></div>
+      <div class="stat"><div class="stat-label">Modules</div><div class="stat-val">${modDone}/${examModules.length}</div></div>
+      <div class="stat"><div class="stat-label">Coverage</div><div class="stat-val">${es.pct}%</div></div>
+    </div>
+    <div class="overall-wrap">
+      <div class="bar-row"><span class="bar-label">${exam.name} coverage</span><span class="bar-pct">${es.pct}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${es.pct}%"></div></div>
+    </div>
+    <div class="modules" id="module-list"></div>`;
+
+  renderModuleCards(container.querySelector('#module-list'), examModules, exam);
+}
+
+function renderModuleCards(listEl, modules, exam){
+  modules.forEach(mod=>{
+    const s = getModuleStats(mod);
+    const marks = exam ? exam.modules[mod.id]?.marks : null;
+    const marksLabel = marks ? `${marks} marks` : '';
+
+    const card = document.createElement('div');
+    card.className = 'mod-card' + (s.done===s.total&&s.total>0?' complete':'');
+    card.id = 'mc_'+mod.id;
+
     const header = document.createElement('div');
     header.className = 'mod-header';
-    header.onclick = ()=>toggleModule(mi);
+    header.onclick = ()=>toggleModule(mod.id);
     header.innerHTML = `
-      <div class="mod-icon">${mi+1}</div>
+      <div class="mod-icon" id="icon_${mod.id}">${s.done===s.total&&s.total>0?'✓':modules.indexOf(mod)+1}</div>
       <div class="mod-info">
         <div class="mod-name">${mod.title}</div>
-        ${ml ? `<div class="mod-marks">${ml}</div>` : ''}
+        ${marksLabel?`<div class="mod-marks">${marksLabel}</div>`:''}
       </div>
-      <div class="mod-pct" id="mp${mi}">0%</div>
-      <div class="chev" id="ch${mi}">›</div>`;
+      <div class="mod-pct" id="mp_${mod.id}">${s.pct}%</div>
+      <div class="chev" id="ch_${mod.id}">›</div>`;
 
     const barBg = document.createElement('div'); barBg.className='mod-bar-bg';
-    barBg.innerHTML = `<div class="mod-bar-fill" id="mb${mi}" style="width:0%"></div>`;
+    barBg.innerHTML = `<div class="mod-bar-fill" id="mb_${mod.id}" style="width:${s.pct}%"></div>`;
 
-    const topics = document.createElement('div');
-    topics.className = 'topics'; topics.id = 'tp'+mi;
+    const topicsEl = document.createElement('div');
+    topicsEl.className = 'topics'; topicsEl.id = 'tp_'+mod.id;
+
     mod.topics.forEach((topic,ti)=>{
+      const checked = getChecked(mod.id, ti);
       const row = document.createElement('label'); row.className='topic-row';
-      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=getChecked(mi,ti);
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=checked;
       const span = document.createElement('span');
-      span.className = 'topic-text'+(cb.checked?' done':'');
+      span.className = 'topic-text'+(checked?' done':'');
       span.textContent = topic;
       cb.onchange = e => {
-        setChecked(mi,ti,e.target.checked);
+        setChecked(mod.id, ti, e.target.checked);
         span.className = 'topic-text'+(e.target.checked?' done':'');
-        updateModBar(mi); updateStats();
+        refreshModuleUI(mod.id);
+        refreshGlobalStats();
       };
       row.appendChild(cb); row.appendChild(span);
-      topics.appendChild(row);
+      topicsEl.appendChild(row);
     });
 
-    card.appendChild(header); card.appendChild(barBg); card.appendChild(topics);
-    list.appendChild(card);
-    updateModBar(mi);
+    card.appendChild(header); card.appendChild(barBg); card.appendChild(topicsEl);
+    listEl.appendChild(card);
   });
-  updateStats();
 }
 
+function toggleModule(modId){
+  document.getElementById('tp_'+modId)?.classList.toggle('open');
+  document.getElementById('ch_'+modId)?.classList.toggle('open');
+}
+
+function refreshModuleUI(modId){
+  const mod = MODULES.find(m=>m.id===modId);
+  if(!mod) return;
+  const s = getModuleStats(mod);
+  const pctEl = document.getElementById('mp_'+modId);
+  const barEl = document.getElementById('mb_'+modId);
+  const cardEl = document.getElementById('mc_'+modId);
+  const iconEl = document.getElementById('icon_'+modId);
+  if(pctEl) pctEl.textContent = s.pct+'%';
+  if(barEl) barEl.style.width = s.pct+'%';
+  if(cardEl){ if(s.done===s.total&&s.total>0) cardEl.classList.add('complete'); else cardEl.classList.remove('complete'); }
+  if(iconEl) iconEl.textContent = (s.done===s.total&&s.total>0)?'✓':iconEl.textContent;
+}
+
+function refreshGlobalStats(){
+  // re-render exam summary cards if on master
+  if(currentTab==='master'){
+    const examSummary = document.getElementById('exam-summary');
+    if(examSummary){
+      examSummary.innerHTML='';
+      EXAMS.forEach(exam=>{
+        const es = getExamStats(exam);
+        const card = document.createElement('div');
+        card.className = 'exam-card';
+        card.innerHTML = `
+          <div class="exam-card-name">${exam.name}</div>
+          <div class="exam-card-pct">${es.pct}%</div>
+          <div class="exam-card-bar-bg"><div class="exam-card-bar-fill" style="width:${es.pct}%"></div></div>
+          <div class="exam-card-sub">${es.done} / ${es.total} topics</div>`;
+        examSummary.appendChild(card);
+      });
+    }
+    // update master stats
+    const s = getMasterStats();
+    const doneEl = document.getElementById('done-count');
+    if(doneEl) doneEl.textContent = s.done;
+    // update overall bar
+    const bars = document.querySelectorAll('.overall-wrap .bar-fill');
+    const pcts = document.querySelectorAll('.overall-wrap .bar-pct');
+    bars.forEach(b=>b.style.width=s.pct+'%');
+    pcts.forEach(p=>p.textContent=s.pct+'%');
+  } else {
+    // update exam stats row
+    const exam = EXAMS.find(e=>e.key===currentTab);
+    if(exam){
+      const es = getExamStats(exam);
+      const bars = document.querySelectorAll('.overall-wrap .bar-fill');
+      const pcts = document.querySelectorAll('.overall-wrap .bar-pct');
+      bars.forEach(b=>b.style.width=es.pct+'%');
+      pcts.forEach(p=>p.textContent=es.pct+'%');
+    }
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 setSync('syncing', 'Loading progress…');
+renderTabs();
 loadAllProgress();
 </script>
 </body>
